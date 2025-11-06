@@ -12,8 +12,9 @@ export default function Home() {
     console.log("fetching advocates...");
     fetch("/api/advocates").then((response) => {
       response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
+        const advocatesInstances = jsonResponse.data.map((data: Partial<Advocate>) => new Advocate(data));
+        setAdvocates(advocatesInstances);
+        setFilteredAdvocates(advocatesInstances);
       });
     });
   }, []);
@@ -61,30 +62,30 @@ export default function Home() {
       <table>
         <thead>
           <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
-            <th>Degree</th>
-            <th>Specialties</th>
-            <th>Years of Experience</th>
-            <th>Phone Number</th>
+            <th style={{ textAlign: "left", verticalAlign: "top" }}>First Name</th>
+            <th style={{ textAlign: "left", verticalAlign: "top" }}>Last Name</th>
+            <th style={{ textAlign: "left", verticalAlign: "top" }}>City</th>
+            <th style={{ textAlign: "left", verticalAlign: "top" }}>Degree</th>
+            <th style={{ textAlign: "left", verticalAlign: "top" }}>Specialties</th>
+            <th style={{ textAlign: "left", verticalAlign: "top" }}>Years of Experience</th>
+            <th style={{ textAlign: "left", verticalAlign: "top" }}>Phone Number</th>
           </tr>
         </thead>
         <tbody>
           {filteredAdvocates.map((advocate) => {
             return (
               <tr key={advocate.phoneNumber}>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
+                <td style={{ textAlign: "left", verticalAlign: "top" }}>{advocate.firstName}</td>
+                <td style={{ textAlign: "left", verticalAlign: "top" }}>{advocate.lastName}</td>
+                <td style={{ textAlign: "left", verticalAlign: "top" }}>{advocate.city}</td>
+                <td style={{ textAlign: "left", verticalAlign: "top" }}>{advocate.degree}</td>
+                <td style={{ textAlign: "left", verticalAlign: "top" }}>
                   {advocate.specialties.map((s) => (
                     <div key={s}>{s}</div>
                   ))}
                 </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
+                <td style={{ textAlign: "left", verticalAlign: "top" }}>{advocate.yearsOfExperience}</td>
+                <td style={{ textAlign: "left", verticalAlign: "top" }}>{advocate.phoneNumber}</td>
               </tr>
             );
           })}
