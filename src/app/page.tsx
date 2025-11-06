@@ -30,7 +30,8 @@ export default function Home() {
         advocate.city.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
         advocate.degree.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
         advocate.specialties.some(s => s.toLowerCase().includes(currentSearchTerm.toLowerCase())) ||
-        advocate.yearsOfExperience.toString().includes(currentSearchTerm)
+        advocate.yearsOfExperience.toString().includes(currentSearchTerm) ||
+        advocate.phoneNumber.toString().includes(currentSearchTerm)
       );
     });
 
