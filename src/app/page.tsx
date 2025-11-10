@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Advocate } from "./api/advocates/model";
 import {
   AppBar,
@@ -21,45 +21,61 @@ import {
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+
+  const fetchAdvocates = async (currentPage: number, currentSearchTerm: string) => {
+    console.log("fetching advocates...");
+    const response = await fetch(
+      `/api/advocates?page=${currentPage}&limit=${limit}&search=${currentSearchTerm}`
+    );
+    const jsonResponse = await response.json();
+    const advocatesInstances = jsonResponse.data.map(
+      (data: Partial<Advocate>) => new Advocate(data)
+    );
+    setAdvocates(advocatesInstances);
+    setTotal(jsonResponse.total);
+    setPage(jsonResponse.page);
+    setLimit(jsonResponse.limit);
+  };
 
   useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        const advocatesInstances = jsonResponse.data.map((data: Partial<Advocate>) => new Advocate(data));
-        setAdvocates(advocatesInstances);
-        setFilteredAdvocates(advocatesInstances);
-      });
-    });
+    fetchAdvocates(page, searchTerm);
+  }, [page, limit, searchTerm]);
+
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    setPage(1); // Reset to first page on new search
+
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(() => {
+    }, 300); // Debounce for 300ms
   }, []);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const currentSearchTerm = e.target.value;
-    setSearchTerm(currentSearchTerm);
-
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate: Advocate) => {
-      return (
-        advocate.firstName.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-        advocate.lastName.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-        advocate.city.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-        advocate.degree.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-        advocate.specialties.some(s => s.toLowerCase().includes(currentSearchTerm.toLowerCase())) ||
-        advocate.yearsOfExperience.toString().includes(currentSearchTerm) ||
-        advocate.phoneNumber.toString().includes(currentSearchTerm)
-      );
-    });
-
-    setFilteredAdvocates(filteredAdvocates);
+  const handleResetSearch = () => {
+    setSearchTerm("");
+    setPage(1);
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
   };
 
-  const resetSearch = () => {
-    console.log(advocates);
-    setSearchTerm(""); // Clear the search term
-    setFilteredAdvocates(advocates);
+  const handleNextPage = () => {
+    setPage((prevPage) => prevPage + 1);
   };
+
+  const handlePreviousPage = () => {
+    setPage((prevPage) => Math.max(1, prevPage - 1));
+  };
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <Box sx={{ flexGrow: 1, backgroundColor: "background.default", minHeight: "100vh" }}>
@@ -85,10 +101,10 @@ export default function Home() {
               label="Search"
               variant="outlined"
               value={searchTerm}
-              onChange={onChange}
+              onChange={handleSearchChange}
               sx={{ minWidth: { xs: "100%", sm: "300px" } }}
             />
-            <Button variant="contained" color="secondary" onClick={resetSearch} sx={{ color: "black" }}>
+            <Button variant="contained" color="secondary" onClick={handleResetSearch} sx={{ color: "black" }}>
               Reset Search
             </Button>
           </Box>
@@ -111,7 +127,7 @@ export default function Home() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredAdvocates.map((advocate) => (
+              {advocates.map((advocate: Advocate) => (
                 <TableRow
                   key={advocate.phoneNumber}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 }, backgroundColor: "background.paper" }}
@@ -123,7 +139,7 @@ export default function Home() {
                   <TableCell sx={{ color: "text.primary", fontFamily: '"Lato", sans-serif' }}>{advocate.city}</TableCell>
                   <TableCell sx={{ color: "text.primary", fontFamily: '"Lato", sans-serif' }}>{advocate.degree}</TableCell>
                   <TableCell sx={{ color: "text.primary", fontFamily: '"Lato", sans-serif' }}>
-                    {advocate.specialties.map((s) => (
+                    {advocate.specialties.map((s: string) => (
                       <Typography key={s} variant="body2" sx={{ fontFamily: '"Lato", sans-serif' }}>{s}</Typography>
                     ))}
                   </TableCell>
@@ -134,6 +150,28 @@ export default function Home() {
             </TableBody>
           </Table>
         </TableContainer>
+
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3, gap: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handlePreviousPage}
+            disabled={page === 1}
+            sx={{ color: "black" }}
+          >
+            Previous
+          </Button>
+          <Typography variant="body1" sx={{ color: "text.primary", alignSelf: "center" }}>
+            Page {page} of {totalPages}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={handleNextPage}
+            disabled={page === totalPages}
+            sx={{ color: "black" }}
+          >
+            Next
+          </Button>
+        </Box>
       </Container>
     </Box>
   );
