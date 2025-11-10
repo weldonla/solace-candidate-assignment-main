@@ -26,16 +26,23 @@ The app is configured to return a default list of advocates. This will allow you
 docker compose up -d
 ```
 
-2. Create a `solaceassignment` database.
 
-3. Push migration to the database
+3. Generate Drizzle migrations
 
 ```bash
-npx drizzle-kit push
+npm run generate
 ```
 
-4. Seed the database
+4. Push migrations to the database
+
+```bash
+npm run migrate:up
+```
+
+5. Seed the database (optional)
 
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
+
+**Note:** The `solaceassignment` database is automatically created by Docker Compose due to the `POSTGRES_DB` environment variable in `docker-compose.yml`. You do not need to create it manually.
