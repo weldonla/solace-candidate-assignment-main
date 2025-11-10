@@ -34,12 +34,16 @@ npm run generate
 ```
 
 4. Push migrations to the database
-
+```bash
+npx drizzle-kit push
+```
+or
 ```bash
 npm run migrate:up
 ```
+(these seem to accomplish the same goal)
 
-5. Seed the database (optional)
+5. Seed the database
 
 ```bash
 curl -X POST http://localhost:3000/api/seed
