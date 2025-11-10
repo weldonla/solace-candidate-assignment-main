@@ -55,7 +55,7 @@ export default function Home() {
     setFilteredAdvocates(filteredAdvocates);
   };
 
-  const onClick = () => {
+  const resetSearch = () => {
     console.log(advocates);
     setSearchTerm(""); // Clear the search term
     setFilteredAdvocates(advocates);
@@ -88,7 +88,7 @@ export default function Home() {
               onChange={onChange}
               sx={{ minWidth: { xs: "100%", sm: "300px" } }}
             />
-            <Button variant="contained" color="secondary" onClick={onClick} sx={{ color: "black" }}>
+            <Button variant="contained" color="secondary" onClick={resetSearch} sx={{ color: "black" }}>
               Reset Search
             </Button>
           </Box>
