@@ -1,0 +1,1 @@
+If I have time, I might come back to the page.tsx and make it more mobile friendly. Having a table in general makes it difficult to look good on mobile, but we could maybe at certain screen sizes hide most of the information, but show full details on click or something.
